@@ -62,7 +62,6 @@ func parseLogLevel(in string) (LogLevel, error) {
 //需要文件大小收集器
 //需要切换目标日志文件器
 //文件写入器
-//
 
 
 

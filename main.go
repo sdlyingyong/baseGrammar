@@ -10,10 +10,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/go-redis/redis"
-	_ "github.com/go-sql-driver/mysql"
-	"github.com/jmoiron/sqlx"
-	"github.com/nsqio/go-nsq"
 	"io"
 	"io/ioutil"
 	"math"
@@ -30,6 +26,11 @@ import (
 	"syscall"
 	"time"
 	"unicode"
+
+	"github.com/go-redis/redis"
+	_ "github.com/go-sql-driver/mysql"
+	"github.com/jmoiron/sqlx"
+	"github.com/nsqio/go-nsq"
 )
 
 const (
@@ -105,7 +106,7 @@ func main() {
 
 		showTime()
 		showGetInfo(1)
-		//showSliceDemo()
+		showSliceDemo()
 		showLogExt()
 
 		showReflect()
@@ -139,6 +140,7 @@ func main() {
 		showSyncMap()
 		showAtomicAdd()
 		showAtomic()
+		showSyncPool()
 
 		showTCPServer()
 		showTCPClient()
@@ -163,8 +165,9 @@ func main() {
 		showNsqConsumer()
 
 		showGoRoutineExit()
+		showContext()
 	}
-	showContext()
+
 }
 
 func sonWorkerCont(ctx context.Context) {
@@ -733,6 +736,24 @@ func showTCPServer() {
 		}
 		go processConn(conn)
 	}
+}
+
+//存放对象的内存池,减少内存占用,无引用自动回收减轻cg压力
+func showSyncPool() {
+	//放在内存池,无引用自动回收
+	pool := &sync.Pool{New: func() interface{} {
+		return new(person)
+	}}
+	//从池中拿到对象
+	p1 := pool.Get().(*person)
+	fmt.Println("获取了内存池中的对象 p1 :", p1)
+	p1.age = 20
+	//用完还回内存池
+	pool.Put(p1)
+	fmt.Println("把对象放回内存池中")
+	//拿到空
+	fmt.Println("pool拿到对象 person :", pool.Get().(*person))
+	fmt.Println("pool里的对象空了,调用get : ", pool.Get().(*person))
 }
 
 func showAtomic() {
